@@ -384,56 +384,78 @@
 
 
         <!-- Ucapan dan Doa -->
-    <section class="py-5" style="background-color: #A8BBA3;" id="ucapan">
-    <div class="container">
-        <div class="card-body border rounded-4 shadow p-4" style="background-color: #FFF8E7;">
-            <h1 class="text-center mb-3" 
-                style="font-size: 3rem; font-family: 'Great Vibes', cursive; color:#3E4D3C;">
-                Ucapan & Doa
-            </h1>
-            <p class="p-2 text-center" style="color: #333333;">
-                "Kami mengundang Anda untuk turut merayakan hari bahagia kami pada pernikahan kami. 
-                Kami akan sangat senang dan berterima kasih jika Anda dapat hadir untuk berbagi kebahagiaan bersama kami."
-            </p>
+        <section class="py-5" style="background-color: #A8BBA3;" id="ucapan">
+            <div class="container">
+                <div class="card-body border rounded-4 shadow p-4" style="background-color: #FFF8E7;">
+                <h1 class="text-center mb-3" 
+                    style="font-size: 3rem; font-family: 'Great Vibes', cursive; color:#3E4D3C;">
+                    Ucapan & Doa
+                </h1>
+                <p class="p-2 text-center" style="color: #333333;">
+                    "Kami mengundang Anda untuk turut merayakan hari bahagia kami pada pernikahan kami. 
+                    Kami akan sangat senang dan berterima kasih jika Anda dapat hadir untuk berbagi kebahagiaan bersama kami."
+                </p>
 
-            <div class="mb-3">
-                <label for="formnama" class="form-label" style="color:#3E4D3C;">Nama</label>
-                <input type="text" class="form-control shadow-sm" id="formnama" placeholder="Isikan Nama Anda">
-            </div>
+                <!-- Form Ucapan -->
+                <div class="mb-3">
+                    <label for="formnama" class="form-label" style="color:#3E4D3C;">Nama</label>
+                    <input type="text" class="form-control shadow-sm" id="formnama" placeholder="Isikan Nama Anda">
+                </div>
 
-            <div class="mb-3">
-                <label for="hadiran" class="form-label" style="color:#3E4D3C;">Kehadiran</label>
-                <select class="form-select shadow-sm" id="hadiran">
+                <div class="mb-3">
+                    <label for="hadiran" class="form-label" style="color:#3E4D3C;">Kehadiran</label>
+                    <select class="form-select shadow-sm" id="hadiran">
                     <option value="0" selected>Konfirmasi Kehadiran</option>
                     <option value="1">Hadir</option>
                     <option value="2">Berhalangan</option>
-                </select>
-            </div>
+                    </select>
+                </div>
 
-            <div class="mb-3" id="jumlah_container">
-                <label for="jumlah_orang" class="form-label" style="color:#3E4D3C;">Jumlah Orang yang Hadir</label>
-                <input type="number" class="form-control shadow-sm" id="jumlah_orang" min="1" placeholder="Jumlah orang yang datang">
-            </div>
+                <div class="mb-3" id="jumlah_container" style="display:none;">
+                    <label for="jumlah_orang" class="form-label" style="color:#3E4D3C;">Jumlah Orang yang Hadir</label>
+                    <input type="number" class="form-control shadow-sm" id="jumlah_orang" min="1" placeholder="Jumlah orang yang datang">
+                </div>
 
-            <div class="mb-3">
-                <label for="formpesan" class="form-label" style="color:#3E4D3C;">Ucapan & Doa</label>
-                <textarea class="form-control shadow-sm" id="formpesan" rows="4" placeholder="Tulis Ucapan & Doa"></textarea>
-            </div>
+                <div class="mb-3">
+                    <label for="formpesan" class="form-label" style="color:#3E4D3C;">Ucapan & Doa</label>
+                    <textarea class="form-control shadow-sm" id="formpesan" rows="4" placeholder="Tulis Ucapan & Doa"></textarea>
+                </div>
 
-            <div class="d-grid mb-2">
-                <button class="btn rounded-4 shadow" 
-                        style="background-color:#5E7551; color:white; border:none;" 
-                        onclick="kirim()" id="kirim">
+                <div class="d-grid mb-2">
+                    <button class="btn rounded-4 shadow" 
+                            style="background-color:#5E7551; color:white; border:none;" 
+                            onclick="kirim()" id="kirim">
                     Kirim <i class="fa-solid fa-paper-plane ms-1"></i>
-                </button>
-            </div>
-        </div>
+                    </button>
+                </div>
+                </div>
 
-        <div class="rounded-4 mt-4 mb-2 p-3 text-center" style="background-color:#FFF8E7; color:#A67C52;">
-            Belum ada ucapan
-        </div>
-    </div>
-</section>
+                <!-- Daftar Ucapan -->
+                <div id="daftarucapan" class="rounded-4 mt-4 mb-2 p-3 text-left" 
+                    style="background-color:#FFF8E7; color:#A67C52;">
+                Belum ada ucapan
+                </div>
+
+                <!-- Pagination -->
+               <!-- Pagination -->
+                <div id="pagination" class="card border-0 shadow-sm rounded-4 p-3 mt-3 text-center" 
+                    style="background-color:#FFF8E7; margin-bottom:90px;">
+                    <div class="d-flex justify-content-center gap-3">
+                        <button class="btn btn-sm rounded-4 px-4" 
+                                style="background-color:#5E7551; color:white; border:none;" 
+                                id="previous" onclick="pagination.previous()">
+                            <i class="fa-solid fa-chevron-left me-1"></i> Sebelumnya
+                        </button>
+                        <button class="btn btn-sm rounded-4 px-4" 
+                                style="background-color:#5E7551; color:white; border:none;" 
+                                id="next" onclick="pagination.next()">
+                            Selanjutnya <i class="fa-solid fa-chevron-right ms-1"></i>
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </section>
 
     </main>
 

@@ -3,53 +3,44 @@ let ucapanData = [];
 let currentPage = 1;
 const itemsPerPage = 5;
 
-// Objek untuk pagination
+// Pagination object
 const pagination = {
-    next: function() {
-        currentPage++;
-        displayUcapan();
+    next: function () {
+        const totalPages = Math.ceil(ucapanData.length / itemsPerPage);
+        if (currentPage < totalPages) {
+            currentPage++;
+            renderUcapan();
+        }
     },
-    previous: function() {
+    previous: function () {
         if (currentPage > 1) {
             currentPage--;
-            displayUcapan();
+            renderUcapan();
         }
     }
 };
 
-// Fungsi untuk mengirim ucapan baru
+// Kirim ucapan baru
 async function kirim() {
     const nama = document.getElementById('formnama').value.trim();
     const hadiran = document.getElementById('hadiran').value;
-    const jumlahOrang  = document.getElementById('jumlah_orang').value;
+    const jumlahOrang = document.getElementById('jumlah_orang').value;
     const pesan = document.getElementById('formpesan').value.trim();
-    
-    // Validasi form
-    if (!nama) {
-        alert('Silakan isi nama Anda');
-        return;
-    }
-    
-    if (hadiran === '0') {
-        alert('Silakan konfirmasi kehadiran Anda');
-        return;
-    }
 
+    // Validasi form
+    if (!nama) { alert('Silakan isi nama Anda'); return; }
+    if (hadiran === '0') { alert('Silakan konfirmasi kehadiran Anda'); return; }
     if (hadiran === '1' && (jumlahOrang === '' || parseInt(jumlahOrang) < 1)) {
         alert('Silakan isi jumlah orang yang akan hadir');
         return;
     }
-    
-    if (!pesan) {
-        alert('Silakan tulis ucapan dan doa Anda');
-        return;
-    }
-    
-    // Buat objek ucapan baru
+    if (!pesan) { alert('Silakan tulis ucapan dan doa Anda'); return; }
+
+    // Objek ucapan
     const ucapan = {
         nama: nama,
         hadiran: hadiran,
-        jumlahOrang: jumlahOrang,
+        jumlahOrang: hadiran === '1' ? jumlahOrang : "0",
         pesan: pesan,
         tanggal: new Date().toLocaleDateString('id-ID', {
             day: 'numeric',
@@ -60,128 +51,114 @@ async function kirim() {
         }),
         timestamp: firebase.database.ServerValue.TIMESTAMP
     };
-    
+
     try {
-        // Kirim ke Firebase
-        const newUcapanRef = database.ref('ucapan').push();
-        await newUcapanRef.set(ucapan);
-        
-        // Reset form
-        document.getElementById('formnama').value = '';
-        document.getElementById('hadiran').value = '0';
-        document.getElementById('formpesan').value = '';
-        
+        await database.ref('ucapan').push().set(ucapan);
+
+        resetForm();
         alert('Terima kasih atas ucapan dan doanya!');
-        
-        // Refresh tampilan ucapan
-        currentPage = 1;
-        displayUcapan();
+        currentPage = 1; // kembali ke halaman pertama
     } catch (error) {
         console.error("Error menyimpan ucapan:", error);
         alert('Terjadi kesalahan saat mengirim ucapan');
     }
 }
 
-// Fungsi untuk menampilkan ucapan
+// Ambil data realtime dari Firebase
 function displayUcapan() {
-    const daftarucapan = document.getElementById('daftarucapan');
-    daftarucapan.innerHTML = '<div class="text-center py-3">Memuat ucapan...</div>';
-    
-    // Ambil data dari Firebase
-    database.ref('ucapan').orderByChild('timestamp').once('value')
-        .then((snapshot) => {
-            const allUcapan = [];
-            snapshot.forEach((childSnapshot) => {
-                const ucapan = childSnapshot.val();
-                ucapan.id = childSnapshot.key; // Tambahkan ID dari Firebase
-                allUcapan.unshift(ucapan); // Masukkan di awal array untuk urutan terbaru pertama
-            });
-            
-            // Update ucapanData untuk pagination
-            ucapanData = allUcapan;
-            
-            // Hitung total halaman
-            const totalPages = Math.ceil(ucapanData.length / itemsPerPage);
-            
-            // Update status pagination
-            document.getElementById('previous').classList.toggle('disabled', currentPage === 1);
-            document.getElementById('next').classList.toggle('disabled', currentPage === totalPages || ucapanData.length === 0);
-            
-            // Potong data untuk halaman saat ini
-            const startIndex = (currentPage - 1) * itemsPerPage;
-            const endIndex = startIndex + itemsPerPage;
-            const currentUcapan = ucapanData.slice(startIndex, endIndex);
-            
-            if (currentUcapan.length === 0) {
-                daftarucapan.innerHTML = '<div class="text-center py-3">Belum ada ucapan</div>';
-                return;
-            }
-            
-            // Kosongkan daftar ucapan
-            daftarucapan.innerHTML = '';
-            
-            // Buat elemen untuk setiap ucapan
-            currentUcapan.forEach(ucapan => {
-                const ucapanElement = document.createElement('div');
-                ucapanElement.className = 'card border-0 shadow-sm mb-3';
-                ucapanElement.innerHTML = `
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <h5 class="card-title mb-0">${ucapan.nama}</h5>
-                            <small class="text-muted">${ucapan.tanggal}</small>
-                        </div>
-                        <div class="d-flex align-items-center mb-2">
-                            <span class="badge ${ucapan.hadiran === '1' ? 'bg-success' : 'bg-secondary'} me-2">
-                                ${ucapan.hadiran === '1' ? 'Hadir' : 'Berhalangan'}
-                            </span>
-                        </div>
-                        <p class="card-text">${ucapan.pesan}</p>
-                    </div>
-                `;
-                daftarucapan.appendChild(ucapanElement);
-            });
-        })
-        .catch((error) => {
-            console.error("Error mengambil data ucapan:", error);
-            daftarucapan.innerHTML = '<div class="text-center py-3 text-danger">Gagal memuat ucapan</div>';
+    database.ref('ucapan').orderByChild('timestamp').on('value', (snapshot) => {
+        const allUcapan = [];
+        snapshot.forEach((childSnapshot) => {
+            const ucapan = childSnapshot.val();
+            ucapan.id = childSnapshot.key;
+            allUcapan.unshift(ucapan); // terbaru di atas
         });
+        ucapanData = allUcapan;
+        renderUcapan();
+    }, (error) => {
+        console.error("Error mengambil data ucapan:", error);
+        document.getElementById('daftarucapan').innerHTML =
+            '<div class="text-center py-3 text-danger">Gagal memuat ucapan</div>';
+    });
 }
 
+// Render daftar ucapan + pagination
+function renderUcapan() {
+    const daftarucapan = document.getElementById('daftarucapan');
+
+    if (ucapanData.length === 0) {
+        daftarucapan.innerHTML = '<div class="text-center py-3">Belum ada ucapan</div>';
+        return;
+    }
+
+    const totalPages = Math.ceil(ucapanData.length / itemsPerPage);
+    document.getElementById('previous').classList.toggle('disabled', currentPage === 1);
+    document.getElementById('next').classList.toggle('disabled', currentPage === totalPages);
+
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    const currentUcapan = ucapanData.slice(startIndex, endIndex);
+
+    daftarucapan.innerHTML = '';
+    currentUcapan.forEach(ucapan => {
+        const ucapanElement = document.createElement('div');
+        ucapanElement.className = 'card border-0 shadow-sm mb-3';
+        ucapanElement.innerHTML = `
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h5 class="card-title mb-0">${ucapan.nama}</h5>
+                    <small class="text-muted">${ucapan.tanggal}</small>
+                </div>
+                <div class="d-flex align-items-center mb-2">
+                    <span class="badge ${ucapan.hadiran === '1' ? 'bg-success' : 'bg-secondary'} me-2">
+                        ${ucapan.hadiran === '1' ? 'Hadir ('+ucapan.jumlahOrang+' orang)' : 'Berhalangan'}
+                    </span>
+                </div>
+                <p class="card-text text-start">${ucapan.pesan}</p>
+            </div>
+        `;
+        daftarucapan.appendChild(ucapanElement);
+    });
+}
+
+// Reset form
 function resetForm() {
     document.getElementById('formnama').value = '';
     document.getElementById('hadiran').value = '0';
     document.getElementById('jumlah_orang').value = '';
     document.getElementById('formpesan').value = '';
-    document.getElementById('idbalasan').value = '';
-    document.getElementById('batal').style.display = 'none';
-    document.getElementById('kirimbalasan').style.display = 'none';
-    document.getElementById('kirim').style.display = 'block';
+    document.getElementById('jumlah_container').style.display = 'none';
 }
 
-// Inisialisasi saat halaman dimuat
-document.addEventListener('DOMContentLoaded', function() {
-        var totalGuest = 0;
-        // To get the count of messages
-        database.ref('ucapan').once('value')
-        .then((snapshot) => {
-        
-        // You can also iterate through the messages if needed
+// Init
+document.addEventListener('DOMContentLoaded', function () {
+    // Hitung total tamu hadir
+    database.ref('ucapan').on('value', (snapshot) => {
+        let totalGuest = 0;
         snapshot.forEach((childSnapshot) => {
             const ucapan = childSnapshot.val();
             if (ucapan.hadiran === '1') {
-                totalGuest +=  Number(ucapan.jumlahOrang);
+                totalGuest += Number(ucapan.jumlahOrang);
             }
         });
-        console.log(totalGuest);
-        })
-
-        .catch((error) => {
-        console.error("Error getting data:", error);
-        });
+        console.log("Total tamu hadir:", totalGuest);
+    });
 
     displayUcapan();
-    
+
+    // Toggle jumlah orang kalau pilih "Berhalangan"
+    document.getElementById('hadiran').addEventListener('change', function () {
+        if (this.value === '1') {
+            document.getElementById('jumlah_container').style.display = 'block';
+        } else {
+            document.getElementById('jumlah_container').style.display = 'none';
+            document.getElementById('jumlah_orang').value = '';
+        }
+    });
+
     // Sembunyikan tombol balasan yang tidak digunakan
-    document.getElementById('batal').style.display = 'none';
-    document.getElementById('kirimbalasan').style.display = 'none';
+    const batalBtn = document.getElementById('batal');
+    const kirimBalasanBtn = document.getElementById('kirimbalasan');
+    if (batalBtn) batalBtn.style.display = 'none';
+    if (kirimBalasanBtn) kirimBalasanBtn.style.display = 'none';
 });
