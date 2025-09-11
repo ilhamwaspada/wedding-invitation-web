@@ -145,21 +145,10 @@ if (name) {
 
 if (tipe) {
     if (tipe == '1') {
-        document.getElementById("waktu-resepsi").textContent = "07.00 WIB - 08.30 WIB";
+        document.getElementById("waktu-resepsi").textContent = "11.00 WIB - 16.00 WIB";
     } else if (tipe == '2') {
-        document.getElementById("waktu-resepsi").textContent = "07.30 WIB - 9.30 WIB";
-    } else if (tipe == '3'){
-        const element = document.getElementById('tampilan-waktu');
-        element.setAttribute('data-waktu', '2025-06-01 08:00:00');
-
-        document.getElementById("tanggal-acara").textContent = "Rabu, 17 September 2025";
-        document.getElementById("acara").textContent = "Ngunduh Mantu";
-        document.getElementById("waktu-acara").hidden = true;
-        document.getElementById("waktu-unduh").hidden = false;
-
-        document.getElementById("lokasi-acara").hidden = true;
-        document.getElementById("lokasi-unduh").hidden = false;
-    }
+        document.getElementById("waktu-resepsi").textContent = "11.00 WIB - 14.00 WIB";
+    } 
 }
 
 function salin2(button) {
